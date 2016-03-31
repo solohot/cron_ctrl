@@ -14,13 +14,10 @@ if(($list+$stop+$start !=1)||(!defined($ARGV[0]))){
 }
 $job = $ARGV[0];
 if($list){
-	#print "list param is $list\n";
 	&listcrontab;		#Hanlde this "list" command.
 }elsif($stop){
-	#print "stop param is $stop\n";
 	&stopcrontab;		#Hanlde this "stop" command.
 }elsif($start){
-	#print "start param is $start\n";
 	&startcrontab;		#Hanlde this "start" command.
 }
 
@@ -46,8 +43,52 @@ sub listcrontab{
 	print "There is no crontab job named $job!\n";
 }
 sub stopcrontab{
-	print "Stop the crontab job of $job.\n";;
+	@crontabinfo = `crontab -l`;
+	foreach(@crontabinfo){
+		if(/^(#?)(.*?)(\/|\w)*$job$/)
+		{
+			if($1 eq "#"){
+				print "The crontab job of $job is already halt!\n";
+				return;
+			}else{
+				&stopcrontabjob($job);
+			}
+				
+			
+		}else{
+			next;
+		}
+	}
+	print "There is no crontab job named $job!\n";	
 }
 sub startcrontab{
-	print "start the crontab job of $job.\n";
+		@crontabinfo = `crontab -l`;
+	foreach(@crontabinfo){
+		if(/^(#?)(.*?)(\/|\w)*$job$/)
+		{
+			if($1 eq "#"){
+				print "The crontab job of $job is already halt!\n";
+				return;
+			}else{
+				
+			}
+				
+			
+		}else{
+			next;
+		}
+	}
+	print "There is no crontab job named $job!\n";	
 }
+#I wanna start a new proccess "crontab -e &",it will gernerate a file named "crontab.xxxxx".
+#I can edit it, then kill the new proccess. I thought it may work.
+#However I faild (＞﹏＜).
+sub stopcrontabjob{
+	defined (my $pid = fork) or die "Cannot fork: $!";
+	unless($pid){
+		exec "crontab -e &";
+		die "Cannot run crontab: $!";
+	}
+	print "$pid\n";
+}
+
